@@ -37,6 +37,8 @@ end
 # Functions
 #
 
+# Parses the pods file which is a flat list of pod spec names.
+# Returns an array of strings.
 def parse_list
   # File containing the list of pods to mirror. Assumed in same dir as this script.
   pods_list_file = "pods"
@@ -55,6 +57,8 @@ def parse_list
   return pods_list
 end
 
+# Fetches pod metadata for the given spec name.
+# Returns a Pod object containing metadata.
 def fetch_pod_metadata(spec_name)
   base_url = 'http://search.cocoapods.org/api/v1/pods.flat.hash.json'
   query_string = "query=on%3Aios%20#{spec_name}&amount=1"
@@ -67,9 +71,12 @@ def fetch_pod_metadata(spec_name)
   return Pod.new(json['id'], json['summary'], json['authors'], json['version'], json['link'], json['source']['git'])
 end
 
+# Fetches the spec for the given pod.
+# Returns the body of the spec.
 def fetch_spec(pod)
   base_url = 'https://raw.githubusercontent.com/CocoaPods/Specs/master/Specs/'
   url = URI.parse("#{base_url}#{pod.name}/#{pod.version}/#{pod.name}.podspec.json")
+  puts url.to_s
   req = Net::HTTP::Get.new(url.to_s)
   res = Net::HTTP.start(url.host, url.port) { |http|
     http.request(req)
@@ -85,5 +92,6 @@ counter = 1
 parse_list.each do |pod_name|
   puts "#{counter}: Fetching spec for #{pod_name}"
   counter = counter + 1
-  puts fetch_pod_metadata(pod_name)
+  pod = fetch_pod_metadata(pod_name)
+  fetch_spec(pod)
 end
