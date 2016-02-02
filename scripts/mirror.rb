@@ -35,7 +35,7 @@ def parse_list
 end
 
 def fetch_spec(spec_name)
-  base_url = 'http://search.cocoapods.org/api/v1/pods.flat.ids.json'
+  base_url = 'http://search.cocoapods.org/api/v1/pods.flat.hash.json'
   query_string = "query=on%3Aios%20#{spec_name}&amount=1"
   url = URI.parse("#{base_url}?#{query_string}")
   req = Net::HTTP::Get.new(url.to_s)
