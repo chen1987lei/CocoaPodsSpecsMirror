@@ -4,6 +4,8 @@
 # scripts/mirror.rb
 #
 # Updates specs for any new releases of tracked pods.
+# Add this repo as a pod spec repo using the following command:
+#   pod repo add specs-mirror https://github.com/phatblat/CocoaPodsSpecsMirror
 #
 
 require 'net/http'
@@ -82,6 +84,15 @@ def fetch_spec(pod)
   pod.spec = response.body
 end
 
+# Saves the spec for the given pod into the spec repo.
+#   pod repo push REPO_NAME SPEC_NAME.podspec
+def save_spec(pod)
+  repo_name = "specs-mirror"
+  file_name = "#{pod.name}.podspec.json"
+  File.open(file_name, 'w') { |file| file.write("#{pod.spec}") }
+  system "pod repo push #{repo_name} #{file_name}"
+end
+
 #
 # Main script logic
 #
@@ -92,4 +103,5 @@ parse_list.each do |pod_name|
   counter = counter + 1
   pod = fetch_pod_metadata(pod_name)
   fetch_spec(pod)
+  save_spec(pod)
 end
