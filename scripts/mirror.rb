@@ -20,6 +20,7 @@ Dir.chdir(File.dirname(__FILE__))
 
 class Pod
   attr_reader :name, :summary, :authors, :version, :homepage, :source
+  attr_accessor :spec
   def initialize(name, summary, authors, version, homepage, source)
     @name = name
     @summary = summary
@@ -72,16 +73,13 @@ def fetch_pod_metadata(spec_name)
 end
 
 # Fetches the spec for the given pod.
-# Returns the body of the spec.
+# Adds the body of the spec to the pod.
 def fetch_spec(pod)
   base_url = 'https://raw.githubusercontent.com/CocoaPods/Specs/master/Specs/'
   url = URI.parse("#{base_url}#{pod.name}/#{pod.version}/#{pod.name}.podspec.json")
   puts url.to_s
-  req = Net::HTTP::Get.new(url.to_s)
-  res = Net::HTTP.start(url.host, url.port) { |http|
-    http.request(req)
-  }
-  puts res.body
+  response = Net::HTTP.get_response(url)
+  pod.spec = response.body
 end
 
 #
