@@ -7,10 +7,31 @@
 #
 
 require 'net/http'
+require 'rubygems'
+require 'json'
 
 
 # Switch the current dir to be the one containing this script.
 Dir.chdir(File.dirname(__FILE__))
+
+#
+# Models
+#
+
+class Pod
+  attr_reader :name, :summary, :authors, :version, :homepage, :source
+  def initialize(name, summary, authors, version, homepage, source)
+    @name = name
+    @summary = summary
+    @authors = authors
+    @version = version
+    @homepage = homepage
+    @source = source
+  end
+  def to_s
+    return "#{@name}: #{@summary} (v#{@version}) <#{@homepage}>"
+  end
+end
 
 #
 # Functions
@@ -34,12 +55,23 @@ def parse_list
   return pods_list
 end
 
-def fetch_spec(spec_name)
+def fetch_pod_metadata(spec_name)
   base_url = 'http://search.cocoapods.org/api/v1/pods.flat.hash.json'
   query_string = "query=on%3Aios%20#{spec_name}&amount=1"
   url = URI.parse("#{base_url}?#{query_string}")
   req = Net::HTTP::Get.new(url.to_s)
-  res = Net::HTTP.start(url.host, url.port) {|http|
+  res = Net::HTTP.start(url.host, url.port) { |http|
+    http.request(req)
+  }
+  json = JSON.parse(res.body)[0]
+  return Pod.new(json['id'], json['summary'], json['authors'], json['version'], json['link'], json['source']['git'])
+end
+
+def fetch_spec(pod)
+  base_url = 'https://raw.githubusercontent.com/CocoaPods/Specs/master/Specs/'
+  url = URI.parse("#{base_url}#{pod.name}/#{pod.version}/#{pod.name}.podspec.json")
+  req = Net::HTTP::Get.new(url.to_s)
+  res = Net::HTTP.start(url.host, url.port) { |http|
     http.request(req)
   }
   puts res.body
@@ -53,5 +85,5 @@ counter = 1
 parse_list.each do |pod_name|
   puts "#{counter}: Fetching spec for #{pod_name}"
   counter = counter + 1
-  fetch_spec(pod_name)
+  puts fetch_pod_metadata(pod_name)
 end
