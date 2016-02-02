@@ -11,6 +11,7 @@
 require 'net/http'
 require 'rubygems'
 require 'json'
+require 'FileUtils'
 
 
 # Switch the current dir to be the one containing this script.
@@ -91,6 +92,9 @@ def save_spec(pod)
   file_name = "#{pod.name}.podspec.json"
   File.open(file_name, 'w') { |file| file.write("#{pod.spec}") }
   system "pod repo push #{repo_name} #{file_name}"
+
+  # Cleanup spec file
+  FileUtils.rm(file_name)
 end
 
 #
