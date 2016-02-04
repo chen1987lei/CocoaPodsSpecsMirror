@@ -13,6 +13,7 @@ require 'rubygems'
 require 'json'
 require 'FileUtils'
 
+$pod_repo_name = 'specs-mirror'
 
 # Switch the current dir to be the one containing this script.
 Dir.chdir(File.dirname(__FILE__))
@@ -43,15 +44,14 @@ end
 
 # Checks whether this repo is installed as a pod repo and installs it if not.
 def check_specs_repo_installed
-repo_name = 'specs-mirror'
-  success = system("pod repo list | grep #{repo_name}")
+  success = system("pod repo list | grep #{$pod_repo_name}")
   return true if success
 
   # Install this git repo as a pod repo
   remote_url = `git remote -v | awk '{print $2}' | head -n 1`
-  success = system("pod repo add #{repo_name} #{remote_url}")
+  success = system("pod repo add #{$pod_repo_name} #{remote_url}")
 
-  puts "Unable to install #{repo_name} as a pod repo" unless success
+  puts "Unable to install #{$pod_repo_name} as a pod repo" unless success
 
   return success
 end
@@ -103,10 +103,9 @@ end
 # Saves the spec for the given pod into the spec repo.
 #   pod repo push REPO_NAME SPEC_NAME.podspec
 def save_spec(pod)
-  repo_name = "specs-mirror"
   file_name = "#{pod.name}.podspec.json"
   File.open(file_name, 'w') { |file| file.write("#{pod.spec}") }
-  system("pod repo push #{repo_name} #{file_name}")
+  system("pod repo push #{$pod_repo_name} #{file_name}")
 
   # Cleanup spec file
   FileUtils.rm(file_name)
