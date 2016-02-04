@@ -122,7 +122,7 @@ exit unless check_specs_repo_installed
 
 counter = 1
 parse_list.each do |pod_name|
-  puts "#{counter}: Fetching spec for #{pod_name}"
+  puts "\n#{counter}: Fetching spec for #{pod_name}"
   counter = counter + 1
   pod = fetch_pod_metadata(pod_name)
   fetch_spec(pod)
