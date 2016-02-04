@@ -116,6 +116,8 @@ end
 # Main script logic
 #
 
+cocoapods_version = `pod --version`.chomp
+system("echo 'CocoaPods version #{cocoapods_version}'")
 exit unless check_specs_repo_installed
 
 counter = 1
