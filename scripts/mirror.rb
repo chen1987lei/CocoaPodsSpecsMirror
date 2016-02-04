@@ -45,7 +45,7 @@ end
 def check_specs_repo_installed
 repo_name = 'specs-mirror'
   success = system("pod repo list | grep #{repo_name}")
-  return if success
+  return true if success
 
   # Install this git repo as a pod repo
   remote_url = `git remote -v | awk '{print $2}' | head -n 1`
