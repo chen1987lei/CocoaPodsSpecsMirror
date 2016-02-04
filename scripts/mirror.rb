@@ -41,6 +41,21 @@ end
 # Functions
 #
 
+# Checks whether this repo is installed as a pod repo and installs it if not.
+def check_specs_repo_installed
+repo_name = 'specs-mirror'
+  success = system("pod repo list | grep #{repo_name}")
+  return if success
+
+  # Install this git repo as a pod repo
+  remote_url = `git remote -v | awk '{print $2}' | head -n 1`
+  success = system("pod repo add #{repo_name} #{remote_url}")
+
+  puts "Unable to install #{repo_name} as a pod repo" unless success
+
+  return success
+end
+
 # Parses the pods file which is a flat list of pod spec names.
 # Returns an array of strings.
 def parse_list
@@ -91,7 +106,7 @@ def save_spec(pod)
   repo_name = "specs-mirror"
   file_name = "#{pod.name}.podspec.json"
   File.open(file_name, 'w') { |file| file.write("#{pod.spec}") }
-  system "pod repo push #{repo_name} #{file_name}"
+  system("pod repo push #{repo_name} #{file_name}")
 
   # Cleanup spec file
   FileUtils.rm(file_name)
@@ -100,6 +115,8 @@ end
 #
 # Main script logic
 #
+
+exit unless check_specs_repo_installed
 
 counter = 1
 parse_list.each do |pod_name|
